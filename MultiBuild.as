@@ -1,0 +1,23 @@
+void main(MultiBuild::Workspace& workspace) {	
+	auto project = workspace.create_project(".");
+	auto properties = project.properties();
+
+	properties.name("stb");
+	properties.binary_object_kind(MultiBuild::BinaryObjectKind::eStaticLib);
+	properties.license("./LICENSE");
+
+	project.include_own_required_includes(true);
+	project.add_required_project_include({
+		"."
+	});
+
+	properties.files({
+		"./*.h",
+		"./*.cpp"
+	});
+	
+	{
+		MultiBuild::ScopedFilter _(workspace, "project.compiler:VisualCpp");
+		properties.defines("__STDC_LIB_EXT1__");
+	}
+}
