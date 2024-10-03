@@ -554,6 +554,8 @@ enum STBVorbisError
    #define STB_VORBIS_NO_STDIO
 #endif
 
+#define STB_VORBIS_NO_CRT
+
 #if defined(STB_VORBIS_NO_CRT) && !defined(STB_VORBIS_NO_STDIO)
    #define STB_VORBIS_NO_STDIO 1
 #endif
@@ -578,6 +580,9 @@ enum STBVorbisError
 #include <stdio.h>
 #endif
 
+#include <MultiEngine/core/Assert.h>
+#include <MultiEngine/core/memory/MemoryAllocation.h>
+
 #ifndef STB_VORBIS_NO_CRT
    #include <stdlib.h>
    #include <string.h>
@@ -592,10 +597,17 @@ enum STBVorbisError
       #include <alloca.h>
    #endif
 #else // STB_VORBIS_NO_CRT
-   #define NULL 0
+   /*#define NULL 0
    #define malloc(s)   0
    #define free(s)     ((void) 0)
-   #define realloc(s)  0
+   #define realloc(s)  0*/
+	#undef assert
+
+	#define NULL 0
+	#define assert(s)		MLE_CORE_ASSERT(s)
+	#define malloc(s)		MultiEngine::memory_allocate(s)
+	#define free(s)			MultiEngine::memory_free(s)
+	#define realloc(a, b)	MultiEngine::memory_reallocate(a, b)
 #endif // STB_VORBIS_NO_CRT
 
 #include <limits.h>
