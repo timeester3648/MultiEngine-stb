@@ -554,8 +554,6 @@ enum STBVorbisError
    #define STB_VORBIS_NO_STDIO
 #endif
 
-#define STB_VORBIS_NO_CRT
-
 #if defined(STB_VORBIS_NO_CRT) && !defined(STB_VORBIS_NO_STDIO)
    #define STB_VORBIS_NO_STDIO 1
 #endif
@@ -597,17 +595,10 @@ enum STBVorbisError
       #include <alloca.h>
    #endif
 #else // STB_VORBIS_NO_CRT
-   /*#define NULL 0
+   #define NULL 0
    #define malloc(s)   0
    #define free(s)     ((void) 0)
-   #define realloc(s)  0*/
-	#undef assert
-
-	#define NULL 0
-	#define assert(s)		MLE_CORE_ASSERT(s)
-	#define malloc(s)		MultiEngine::memory_allocate(s)
-	#define free(s)			MultiEngine::memory_free(s)
-	#define realloc(a, b)	MultiEngine::memory_reallocate(a, b)
+   #define realloc(s)  0
 #endif // STB_VORBIS_NO_CRT
 
 #include <limits.h>
@@ -969,13 +960,13 @@ static void *setup_malloc(vorb *f, int sz)
       f->setup_offset += sz;
       return p;
    }
-   return sz ? malloc(sz) : NULL;
+   return sz ? MultiEngine::memory_allocate(sz) : NULL;
 }
 
 static void setup_free(vorb *f, void *p)
 {
    if (f->alloc.alloc_buffer) return; // do nothing; setup mem is a stack
-   free(p);
+   MultiEngine::memory_free(p);
 }
 
 static void *setup_temp_malloc(vorb *f, int sz)
@@ -986,7 +977,7 @@ static void *setup_temp_malloc(vorb *f, int sz)
       f->temp_offset -= sz;
       return (char *) f->alloc.alloc_buffer + f->temp_offset;
    }
-   return malloc(sz);
+   return MultiEngine::memory_allocate(sz);
 }
 
 static void setup_temp_free(vorb *f, void *p, int sz)
@@ -995,7 +986,7 @@ static void setup_temp_free(vorb *f, void *p, int sz)
       f->temp_offset += (sz+7)&~7;
       return;
    }
-   free(p);
+   MultiEngine::memory_free(p);
 }
 
 #define CRC32_POLY    0x04c11db7   // from spec
